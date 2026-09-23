@@ -1,6 +1,7 @@
 # The Unofficial Guide
 
-<!-- Replace this line with your name and which corpus you picked. -->
+**Author:** Obed Mendoza
+**Corpus:** city_guides
 
 > **This file is your submission.** Fill it in as you go — most sections get
 > written during the milestone that produces them, not at the end.
@@ -26,6 +27,8 @@
      this repo.
 
      Milestone 5. -->
+
+     This project is a Retrieval-Augmented Generation (RAG) application that answers questions using the `city_guides` corpus. The corpus contains 14 travel-guide documents covering nine fictional towns, including information about dining, transportation, accessibility, and other travel-related topics. The system processes these documents into chunks, generates embeddings, and retrieves relevant information to answer user questions. Its goal is to provide answers grounded in the documents while identifying the sources used.
 
 ## Chunking Strategy
 
