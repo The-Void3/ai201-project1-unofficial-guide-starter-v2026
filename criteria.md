@@ -23,8 +23,8 @@ For at least 4 of my 5 test questions, the retrieved chunks include one that
 contains the answer.
 
 **Why this target:**
-<!-- e.g. "One of my questions is about a topic only two documents mention, so
-     I expect that one to be hard." -->
+
+I chose 4/5 because the correct information should be retrieved for most questions, while allowing for an occasional retrieval failure or edge case. A lower target like 3/5 would mean the system is failing to retrieve the answer too often to be considered reliable.
 
 ---
 
@@ -33,8 +33,8 @@ contains the answer.
 Every answer the system produces names at least one source document.
 
 **Why this target:**
-<!-- Why all five and not four? What about your setup makes that achievable —
-     or what would have to go wrong for it not to be? -->
+
+I chose 5/5 because every answer should identify where its information came from, and there isn't a good reason to accept an answer that provides no source. This is an important requirement for being able to verify the system's responses.
 
 ---
 
@@ -50,14 +50,16 @@ in at least 4 of 5 tries.
      just keep five of them, or the "4 of 5" above has nothing to be 4 of. -->
 
 **Why this target:**
-<!-- What did your distances look like when you set the cutoff in Milestone 4?
-     Was there a clean gap, or did the two groups overlap? -->
+
+I chose 4/5 because the relevance gate should reliably recognize when the documents don't contain enough information, while allowing for an occasional mistake. A lower target like 3/5 would mean the system could confidently answer questions it cannot actually support too often.
 
 ---
 
 ## 4. Something about your chunks
 
-<!-- YOU WRITE THIS ONE.
+In at least 4 of 5 randomly selected chunks, the chunk ends at a natural
+sentence or section boundary and does not cut a sentence or thought between
+chunks.
 
      How would you know if your chunks were the right size? Name something
      countable or observable.
@@ -73,13 +75,15 @@ in at least 4 of 5 tries.
 
 **Why this target:**
 
-
+I chose 4/5 because a single imperfect chunk can happen from an edge case, but I still want the chunker to produce sensible boundaries consistently. The city_guides documents contain information that spans multiple sentences and is organized into labeled sections, so splitting in the middle of a sentence or section could leave important context incomplete.
 
 ---
 
 ## 5. Your choice
 
-<!-- YOU WRITE THIS ONE TOO.
+For at least 4 of my 5 questions, every factual claim in the system's answer
+is directly supported by information in the retrieved source documents.
+
 
      Pick something you actually care about getting right. It could be about
      speed, about refusals, about a particular kind of question your corpus
@@ -91,7 +95,10 @@ in at least 4 of 5 tries.
 
 **Why this target:**
 
-
+I chose 4/5 because the system should be reliably grounded in the provided
+documents, while allowing for an occasional error or edge case. A lower target
+like 3/5 would allow too many unsupported claims and would not give me enough
+confidence that the system consistently answers based on the documents.
 
 ---
 
