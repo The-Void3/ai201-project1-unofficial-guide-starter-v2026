@@ -55,22 +55,11 @@ I chose 4/5 because the relevance gate should reliably recognize when the docume
 
 ---
 
-## 4. Something about your chunks
+## 4. Chunks preserve natural boundaries
 
 In at least 4 of 5 randomly selected chunks, the chunk ends at a natural
 sentence or section boundary and does not cut a sentence or thought between
 chunks.
-
-     How would you know if your chunks were the right size? Name something
-     countable or observable.
-
-     Examples of the right shape — don't copy these, they should come from
-     what you actually saw in Milestone 3:
-       - "At least 4 of 5 sampled chunks read as a complete thought, with no
-          sentence cut in half at either end."
-       - "No chunk is shorter than 200 characters, since anything below that
-          in my corpus turned out to be a heading with no content under it." -->
-
 
 
 **Why this target:**
@@ -79,17 +68,10 @@ I chose 4/5 because a single imperfect chunk can happen from an edge case, but I
 
 ---
 
-## 5. Your choice
+## 5. Answers are grounded in retrieved documents
 
 For at least 4 of my 5 questions, every factual claim in the system's answer
 is directly supported by information in the retrieved source documents.
-
-
-     Pick something you actually care about getting right. It could be about
-     speed, about refusals, about a particular kind of question your corpus
-     handles badly, about source attribution being correct rather than merely
-     present — anything, as long as it names a number or an observable
-     outcome. -->
 
 
 

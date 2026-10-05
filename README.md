@@ -32,7 +32,7 @@
 
 ## Chunking Strategy
 
-**Chunk size:** Target: ~700 characters , Maximum: ~800 characters
+**Chunk size:** Variable; approximately 700 characters when practical, maximum 800 characters
 **Overlap:** 0 fixed characters
 
 <!-- What about YOUR documents made you pick these numbers? Short posts and
@@ -100,7 +100,7 @@ May to September. Outside those months the pub in the third village closes, the 
 
 The mill runs tours on the hour from 11 to 3 and the machinery is operating during them, which is loud and much more impressive than a static exhibit. The church has a Saxon doorway. The river walk downstream reaches Brightwater in about three hours.
 
-**Chunk 4** — source: `source: guide_kestrelford.md#6` — produced by: `chunker.py::split_documents`
+**Chunk 4** — source: `guide_kestrelford.md#6` — produced by: `chunker.py::split_documents`
 
 # Kestrelford
 
@@ -136,10 +136,6 @@ steep walk up.
 **Answer:** Mobile coverage is good in the centre and patchy on the outskirts of Brightwater (guide_brightwater.md).
 
 Sources retrieved: guide_brightwater.md, guide_givens_mill.md, guide_regional_transport.md
-
-
-```
-```
 
 **My relevance cutoff:** 0.74
 
@@ -178,9 +174,9 @@ The five in-corpus questions had best distances ranging from 0.4524 to 0.6363, w
 
      Milestone 5. -->
 
-**1.**
+**1.** I used ChatGPT while designing the custom chunking strategy for `city_guides`. I started with the idea of fixed-size chunks, but after discussing the structure of the documents, I changed the design to prioritize Markdown section boundaries, then paragraph boundaries, and finally sentence boundaries as a fallback. I also chose to repeat the document title and section heading in every chunk so retrieved chunks would keep their context.
 
-**2.**
+**2.** I used ChatGPT to help pressure-test my retrieval settings in Milestone 4. After collecting the best distances for my five in-corpus questions and five out-of-scope questions, I compared the two groups and changed the relevance cutoff from 0.6 to 0.74. I kept `top-k = 5` because some useful evidence appeared at rank 5, especially for the railway and seasonal questions.
 
 <!-- ── Stretch features ─────────────────────────────────────────────────────
      Doing one? Say so here BEFORE you start. A feature this README never
