@@ -23,10 +23,12 @@ your pipeline, not giving up.
 """
 
 from dataclasses import dataclass
+import re
 
 import config
 from ingest import Document
 
+MAX_CHUNK_SIZE = 800
 
 @dataclass
 class Chunk:
@@ -79,6 +81,191 @@ def fallback_split(
 
     return chunks
 
+def split_paragraph(
+    prefix: str,
+    paragraph: str,
+    source: str,
+    start_index: int,
+) -> list[Chunk]:
+
+    # Split after sentence-ending punctuation followed by whitespace.
+    sentences = [
+        sentence.strip()
+        for sentence in re.split(r"(?<=[.!?])\s+", paragraph.strip())
+        if sentence.strip()
+    ]
+
+    chunks: list[Chunk] = []
+    current_sentences: list[str] = []
+    next_index = start_index
+
+    for sentence in sentences:
+        joined_sentences = " ".join(current_sentences + [sentence])
+        candidate_text = f"{prefix}\n\n{joined_sentences}".strip()
+
+        if len(candidate_text) <= MAX_CHUNK_SIZE:
+            current_sentences.append(sentence)
+
+        else:
+            if current_sentences:
+                current_text = (
+                    f"{prefix}\n\n{' '.join(current_sentences)}"
+                ).strip()
+
+                chunks.append(
+                    Chunk(
+                        text=current_text,
+                        source=source,
+                        index=next_index,
+                        produced_by="chunker.py::split_documents",
+                    )
+                )
+                next_index += 1
+                current_sentences = []
+
+            fresh_text = f"{prefix}\n\n{sentence}".strip()
+
+            if len(fresh_text) <= MAX_CHUNK_SIZE:
+                current_sentences = [sentence]
+
+            else:
+                # Emergency fallback: one sentence alone is too long.
+                available = MAX_CHUNK_SIZE - len(prefix) - 2
+
+                if available <= 0:
+                    raise ValueError("Prefix is too long to fit within the maximum chunk size.")
+
+                start = 0
+                while start < len(sentence):
+                    piece = sentence[start : start + available].strip()
+
+                    if piece:
+                        chunks.append(
+                            Chunk(
+                                text=f"{prefix}\n\n{piece}".strip(),
+                                source=source,
+                                index=next_index,
+                                produced_by="chunker.py::split_documents",
+                            )
+                        )
+                        next_index += 1
+
+                    start += available
+
+    if current_sentences:
+        current_text = (
+            f"{prefix}\n\n{' '.join(current_sentences)}"
+        ).strip()
+
+        chunks.append(
+            Chunk(
+                text=current_text,
+                source=source,
+                index=next_index,
+                produced_by="chunker.py::split_documents",
+            )
+        )
+
+    return chunks
+
+def process_section(
+    title: str,
+    heading: str,
+    paragraphs: list[str],
+    source: str,
+    start_index: int,
+    intro: str = "",
+) -> list[Chunk]:
+    if not paragraphs:
+        return []
+    
+    prefix_parts = [title]
+
+    if intro:
+        prefix_parts.append(intro)
+
+    if heading:
+        prefix_parts.append(heading)
+
+    prefix = "\n\n".join(prefix_parts).strip()
+
+    section_text = "\n\n".join(paragraphs).strip()
+    full_text = f"{prefix}\n\n{section_text}".strip()
+
+    # If the whole sections fits, keep it together as one chunk
+    if len(full_text) <= MAX_CHUNK_SIZE:
+        return [
+            Chunk(
+                text=full_text,
+                source=source,
+                index=start_index,
+                produced_by="chunker.py::split_documents",
+            )
+        ]
+
+    chunks: list[Chunk] = []
+    current_paragraphs: list[str] = []
+    next_index = start_index
+
+    for paragraph in paragraphs:
+        candidate_paragraphs = current_paragraphs + [paragraph]
+        joined_candidate = "\n\n".join(candidate_paragraphs)
+        candidate_text = f"{prefix}\n\n{joined_candidate}".strip()
+
+        if len(candidate_text) <= MAX_CHUNK_SIZE:
+            current_paragraphs.append(paragraph)
+
+        else:
+            # Save the current chunk before starting a new one.
+            if current_paragraphs:
+                joined_current = "\n\n".join(current_paragraphs)
+                current_text = f"{prefix}\n\n{joined_current}".strip()
+
+                chunks.append(
+                    Chunk(
+                        text=current_text,
+                        source=source,
+                        index=next_index,
+                        produced_by="chunker.py::split_documents",
+                    )
+                )
+
+                next_index += 1
+                current_paragraphs = []
+
+            # Check whether this paragraph fits by itself
+            fresh_text = f"{prefix}\n\n{paragraph}".strip()
+
+            if len(fresh_text) <= MAX_CHUNK_SIZE:
+                current_paragraphs = [paragraph]
+
+            else:
+                # If one paragraph is still too large, split it at sentence boundaries.
+                sentence_chunks = split_paragraph(
+                    prefix=prefix,
+                    paragraph=paragraph,
+                    source=source,
+                    start_index=next_index,
+                )
+
+                chunks.extend(sentence_chunks)
+                next_index += len(sentence_chunks)
+
+    # Save any remaining paragraphs after the loop
+    if current_paragraphs:
+        joined_current = "\n\n".join(current_paragraphs)
+        current_text = f"{prefix}\n\n{joined_current}".strip()
+
+        chunks.append(
+            Chunk(
+                text=current_text,
+                source=source,
+                index=next_index,
+                produced_by="chunker.py::split_documents",
+            )
+        )
+
+    return chunks
 
 def split_documents(documents: list[Document]) -> list[Chunk]:
     """
@@ -97,7 +284,82 @@ def split_documents(documents: list[Document]) -> list[Chunk]:
       - Would splitting on paragraph breaks keep more thoughts intact than
         splitting on a character count?
     """
-    return fallback_split(documents)
+    
+    chunks: list[Chunk] = []
+
+    for doc in documents:
+        lines = doc.text.splitlines()
+
+        title = ""
+        intro_lines: list[str] = []
+
+        current_heading = ""
+        current_section_lines: list[str] = []
+
+        sections: list[tuple[str, list[str]]] = []
+
+        found_first_section = False
+
+        for line in lines:
+            stripped = line.strip()
+
+            # Document title
+            if stripped.startswith("# "):
+                title = stripped
+                continue
+
+            # New section
+            if stripped.startswith("## "):
+                if current_heading:
+                    sections.append(
+                        (current_heading, current_section_lines)
+                    )
+
+                current_heading = stripped
+                current_section_lines = []
+                found_first_section = True
+                continue
+
+            # Content before the first ## heading is introductory material.
+            if not found_first_section:
+                intro_lines.append(line)
+            else:
+                current_section_lines.append(line)
+
+        # Don't forget the final section.
+        if current_heading:
+            sections.append(
+                (current_heading, current_section_lines)
+            )
+
+        intro = "\n".join(intro_lines).strip()
+        next_index = 0
+
+        for section_number, (heading, section_lines) in enumerate(sections):
+            section_text = "\n".join(section_lines).strip()
+
+            # Blank lines separate paragraphs.
+            paragraphs = [
+                paragraph.strip()
+                for paragraph in section_text.split("\n\n")
+                if paragraph.strip()
+            ]
+
+            section_intro = intro if section_number == 0 else ""
+
+            section_chunks = process_section(
+                title=title,
+                heading=heading,
+                paragraphs=paragraphs,
+                source=doc.source,
+                start_index=next_index,
+                intro=section_intro,
+            )
+
+            chunks.extend(section_chunks)
+            next_index += len(section_chunks)
+
+    return chunks
 
 
 def describe(chunks: list[Chunk]) -> str:

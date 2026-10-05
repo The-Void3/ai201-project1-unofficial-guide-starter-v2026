@@ -32,8 +32,8 @@
 
 ## Chunking Strategy
 
-**Chunk size:**
-**Overlap:**
+**Chunk size:** Target: ~700 characters , Maximum: ~800 characters
+**Overlap:** 0 fixed characters
 
 <!-- What about YOUR documents made you pick these numbers? Short posts and
      long sectioned guides don't want the same chunking, and "800 seemed
@@ -44,6 +44,16 @@
      more than pretending you got it right first time.
 
      Milestone 3. -->
+
+I chose a target of about 700 characters and a maximum of 800 because the `city_guides` documents I examined were long, structured guides rather than short independent posts. Their content was organized into Markdown sections using `##` headings, and the information within each section was usually divided into complete paragraphs. That made section and paragraph boundaries more meaningful than an arbitrary character boundary.
+
+My baseline with the starter chunker produced 51 chunks from 14 documents, with an average of 650 characters, but the shortest chunk was only 24 characters. That showed me that fixed character windows could create very small or incomplete pieces even though the documents already had useful structure.
+
+I therefore changed my approach to use the document structure first. I keep a complete `##` section together whenever it fits within 800 characters. If a section is too large, I split it at paragraph boundaries. If an individual paragraph is still too large, I split it at sentence boundaries so that I do not cut a thought arbitrarily. The 700-character value is a comfortable target rather than a point where I force a cut, while 800 is the maximum I try to stay under.
+
+I also repeat the document title and section heading in every resulting chunk. I chose this because the same section headings can appear in different guides, so keeping both levels of context makes each chunk understandable on its own when it is retrieved.
+
+My initial idea was to use a fixed character window similar to the starter, but after looking more closely at the `city_guides` documents, I decided that their Markdown structure was too useful to ignore. I also initially considered character overlap, but I chose zero overlap because repeating the document title and section heading gives each new chunk context without duplicating paragraph content.
 
 ## Sample Chunks
 
@@ -56,30 +66,65 @@
 
      Milestone 3. -->
 
-**Chunk 1** — source: `` — produced by: ``
+**Chunk 1** — source: `guide_accessibility.md#0` — produced by: `chunker.py::split_documents`
 
-```
-```
+# Getting around the region with limited mobility
 
-**Chunk 2** — source: `` — produced by: ``
+An honest assessment rather than a promotional one. Some of these places are
+difficult and it is better to know in advance.
 
-```
-```
+## Straightforward
 
-**Chunk 3** — source: `` — produced by: ``
+**Thornby Wells** is the easiest town in the region. It is flat, compact, and
+everything is within three minutes of everything else. Parking is free for two
+hours anywhere in town and the station is central. The pump room and gardens
+are level throughout.
 
-```
-```
+**Marchwood** has a modern tram network with level boarding on all four lines,
+running every 8 minutes on weekdays. The city museum and covered market are both
+step-free. The distances between districts are the main consideration.
 
-**Chunk 4** — source: `` — produced by: ``
+**Chunk 2** — source: `guide_corry_vale.md#5` — produced by: `chunker.py::split_documents`
 
-```
-```
+# Corry Vale
 
-**Chunk 5** — source: `` — produced by: ``
+## When to go
 
-```
-```
+May to September. Outside those months the pub in the third village closes, the farm shop reduces its hours, and several footpaths become genuinely boggy rather than merely wet. The road is not gritted above the second village and is impassable in snow.
+
+**Chunk 3** — source: `guide_givens_mill.md#3` — produced by: `chunker.py::split_documents`
+
+# Givens Mill
+
+## What to see
+
+The mill runs tours on the hour from 11 to 3 and the machinery is operating during them, which is loud and much more impressive than a static exhibit. The church has a Saxon doorway. The river walk downstream reaches Brightwater in about three hours.
+
+**Chunk 4** — source: `source: guide_kestrelford.md#6` — produced by: `chunker.py::split_documents`
+
+# Kestrelford
+
+## Practical notes
+
+Cash is still useful at the market and in smaller places, though cards are
+accepted almost everywhere now. Mobile coverage is good in the centre and
+patchy on the outskirts. The nearest full hospital is in Brightwater; there is
+a minor injuries unit locally with limited hours.
+
+**Chunk 5** — source: `guide_regional_transport.md#2` — produced by: `chunker.py::split_documents`
+
+# Getting around the region
+
+## Driving
+
+Roads are good between the towns and poor on the approaches to both Kestrelford
+and Halden Bay. The Kestrelford approach is single-track with passing places
+for the final eight minutes. The Halden Bay coast road is cut into the cliff
+and is slow rather than difficult.
+
+Parking is the constraint rather than driving. Both Halden Bay lots fill by
+10am on summer weekends. Kestrelford's lower car park is free and involves a
+steep walk up.
 
 ## Sample Answer
 
