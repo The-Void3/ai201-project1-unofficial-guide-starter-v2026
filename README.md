@@ -131,14 +131,17 @@ steep walk up.
 <!-- One complete question and answer, pasted as text, with the source line
      visible. Milestone 4. -->
 
-**Question:**
+**Question:** How is the mobile coverage in Brightwater?
 
-**Answer:**
+**Answer:** Mobile coverage is good in the centre and patchy on the outskirts of Brightwater (guide_brightwater.md).
+
+Sources retrieved: guide_brightwater.md, guide_givens_mill.md, guide_regional_transport.md
+
 
 ```
 ```
 
-**My relevance cutoff:**
+**My relevance cutoff:** 0.74
 
 <!-- The number you set in config.py, and how you got there.
 
@@ -149,9 +152,20 @@ steep walk up.
 
      Milestone 4. -->
 
+The five in-corpus questions had best distances ranging from 0.4524 to 0.6363, while the five out-of-scope questions ranged from 0.8350 to 0.9968. This left a clear gap between 0.6363 and 0.8350. I chose 0.74 because it sits comfortably inside that gap, allowing the hardest in-corpus question through while still rejecting the closest out-of-scope question.
+
 | Question | In corpus? | Best distance |
 |---|---|---|
-|  |  |  |
+| Where can I find a meal on a Sunday evening? | Yes | 0.4602 |
+| Are railway tickets cheaper if I book the day before? | Yes | 0.6363 |
+| Which cities does the accessibility guide identify as difficult for walking? | Yes | 0.5423 |
+| What city is quiet during the summer months? | Yes | 0.5227 |
+| How is the mobile coverage in Brightwater? | Yes | 0.4524 |
+| What is the capital of Mongolia? | No | 0.8445 |
+| How do I change the oil in a diesel engine? | No | 0.9032 |
+| Who won the 1994 World Cup? | No | 0.9968 |
+| What is the recommended dosage of ibuprofen for a headache? | No | 0.8350 |
+| How do I write a for loop in Rust? | No | 0.8365 |
 
 ## How I Used AI
 
